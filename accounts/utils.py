@@ -5,6 +5,8 @@ import secrets
 from datetime import datetime
 from django.template.loader import render_to_string
 
+from django.conf import settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +27,6 @@ def send_event_manager_account_created_email(user):
     Send an email to the event manager that their account is created
     Notify the event manager of the terms and conditions of the platform
     """
-    email_body = ("",)
     current_year = datetime.now().year
 
     try:
@@ -34,16 +35,17 @@ def send_event_manager_account_created_email(user):
             {
                 "user": user,
                 "current_year": current_year,
+                "site_url": settings.SITE_URL,
             },
         )
         params = {
-            "from": "Sherehe <noreply@sherehe.com>",
-            "to": user.email,
+            "from": "Sherehe <noreply@sherehe.co.ke>",
+            "to": [user.email],  # Resend expects a list for 'to'
             "subject": "Your Sherehe Account Has Been Created",
             "html": email_body,
         }
-        response = resend.Email.send(**params)
-        logger.info(f"Email sent to {user.email}")
+        response = resend.Emails.send(params)
+        logger.info(f"Email sent to {user.email}: {response}")
         return response
 
     except Exception as e:
@@ -55,7 +57,6 @@ def send_password_reset_email(user, code):
     """
     Send a password reset email to the user
     """
-    email_body = ("",)
     current_year = datetime.now().year
 
     try:
@@ -65,15 +66,16 @@ def send_password_reset_email(user, code):
                 "user": user,
                 "code": code,
                 "current_year": current_year,
+                "site_url": settings.SITE_URL,
             },
         )
         params = {
-            "from": "Sherehe <noreply@sherehe.com>",
-            "to": user.email,
+            "from": "Sherehe <noreply@sherehe.co.ke>",
+            "to": [user.email],
             "subject": "Password Reset",
             "html": email_body,
         }
-        response = resend.Email.send(**params)
+        response = resend.Emails.send(params)
         logger.info(f"Password reset email sent to {user.email}")
         return response
 
