@@ -4,7 +4,10 @@ from rest_framework.validators import UniqueValidator
 import secrets
 import string
 from django.utils import timezone
-from accounts.utils import send_password_reset_email
+from accounts.utils import (
+    send_password_reset_email,
+    send_event_manager_account_created_email,
+)
 
 from accounts.validators import (
     validate_password_digit,
@@ -63,12 +66,10 @@ class BaseUserSerializer(serializers.ModelSerializer):
 # Accounts
 class EventManagerSerializer(BaseUserSerializer):
     def create(self, validated_data):
-        return self.create_user(validated_data, "is_event_manager")
+        user = self.create_user(validated_data, "is_event_manager")
+        send_event_manager_account_created_email(user)
+        return user
 
-
-class VenueManagerSerializer(BaseUserSerializer):
-    def create(self, validated_data):
-        return self.create_user(validated_data, "is_venue_manager")
 
 
 # Password Reset

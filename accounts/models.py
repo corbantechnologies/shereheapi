@@ -67,7 +67,6 @@ class User(
 
     # Roles
     is_event_manager = models.BooleanField(default=False)
-    is_venue_manager = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
