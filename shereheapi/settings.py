@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "cloudinary",
     # Local apps
     "accounts",
+    "company",
 ]
 
 MIDDLEWARE = [
