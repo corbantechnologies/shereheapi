@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+    </head>
+
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2>Welcome to Sherehe!</h2>
+            <p>Hello {{ user.first_name }},</p>
+
+            <p>Congratulations! Your Event Manager account has been successfully created.</p>
+
+            <p>We are excited to have you on board. You can now start managing your events and venues on the Sherehe
+                Platform.</p>
+
+            <h3>Terms and Conditions</h3>
+            <p>By using our platform, you agree to adhere to our <a
+                    href="https://www.sherehe.co.ke/event-management/terms">terms of service and community
+                    guidelines</a>. Please
+                ensure you review them to maintain a safe and professional environment for all users.</p>
+
+            <p>If you have any questions or need assistance, feel free to contact our support team.</p>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ site_url }}/login"
+                    style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Login
+                    to Your Account</a>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+            <p style="font-size: 12px; color: #888;">
+                &copy; {{ current_year }} Sherehe. All rights reserved.
+            </p>
+        </div>
+    </body>
+
+</html>

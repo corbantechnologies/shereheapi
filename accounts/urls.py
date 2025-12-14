@@ -6,6 +6,8 @@ from accounts.views import (
     EventManagerCreateView,
     EventManagerListView,
     UserDetailView,
+    PasswordResetRequestView,
+    PasswordResetConfirmView,
 )
 
 app_name = "accounts"
@@ -22,4 +24,10 @@ urlpatterns = [
         "event-manager/list/", EventManagerListView.as_view(), name="event-manager-list"
     ),
     path("<str:username>/", UserDetailView.as_view(), name="user-detail"),
+    path("password/reset/", PasswordResetRequestView.as_view(), name="password-reset"),
+    path(
+        "password/reset/confirm/",
+        PasswordResetConfirmView.as_view(),
+        name="password-reset-confirm",
+    ),
 ]

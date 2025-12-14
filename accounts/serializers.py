@@ -49,7 +49,6 @@ class BaseUserSerializer(serializers.ModelSerializer):
             "phone_number",
             "country",
             "is_event_manager",
-            "is_venue_manager",
             "is_staff",
             "is_active",
             "is_superuser",
@@ -69,7 +68,6 @@ class EventManagerSerializer(BaseUserSerializer):
         user = self.create_user(validated_data, "is_event_manager")
         send_event_manager_account_created_email(user)
         return user
-
 
 
 # Password Reset
@@ -96,3 +94,54 @@ class PasswordResetSerializer(serializers.Serializer):
         user.save()
 
         send_password_reset_email(user, code)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+    password = serializers.CharField(
+        max_length=128,
+        min_length=5,
+        write_only=True,
+        validators=[
+            validate_password_digit,
+            validate_password_uppercase,
+            validate_password_symbol,
+            validate_password_lowercase,
+        ],
+    )
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        code = attrs.get("code")
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError(
+                {"email": "User with this email does not exist."}
+            )
+
+        if user.password_reset_code != code:
+            raise serializers.ValidationError({"code": "Invalid reset code."})
+
+        # Check expiration (15 minutes)
+        if user.password_reset_code_created_at:
+            created_at = user.password_reset_code_created_at
+            if timezone.now() > created_at + timezone.timedelta(minutes=15):
+                raise serializers.ValidationError({"code": "Reset code has expired."})
+        else:
+            raise serializers.ValidationError({"code": "Invalid reset code."})
+
+        attrs["user"] = user
+        return attrs
+
+    def save(self):
+        user = self.validated_data["user"]
+        password = self.validated_data["password"]
+
+        user.set_password(password)
+        user.password_reset_code = None
+        user.password_reset_code_created_at = None
+        user.save()
+        return user
