@@ -25,7 +25,9 @@ class Company(UniversalIdModel, TimeStampedModel, ReferenceModel):
     )
 
     # Outlook Details
-    name = models.CharField(max_length=255, help_text="Name of the company")
+    name = models.CharField(
+        max_length=255, help_text="Name of the company", unique=True
+    )
     description = models.TextField(
         blank=True, null=True, help_text="Description of the company"
     )
@@ -37,18 +39,26 @@ class Company(UniversalIdModel, TimeStampedModel, ReferenceModel):
     )
 
     # Address
-    country = models.CharField(max_length=255, blank=True, null=True, help_text="Country of the company")
-    city = models.CharField(max_length=255, blank=True, null=True, help_text="City of the company")
-    address = models.CharField(max_length=255, blank=True, null=True, help_text="Address of the company")
+    country = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Country of the company"
+    )
+    city = models.CharField(
+        max_length=255, blank=True, null=True, help_text="City of the company"
+    )
+    address = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Address of the company"
+    )
 
     # Contact
-    phone = models.CharField(max_length=255, blank=True, null=True, help_text="Phone number of the company")
+    phone = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Phone number of the company"
+    )
     email = models.EmailField(blank=True, null=True, help_text="Email of the company")
     website = models.URLField(blank=True, null=True, help_text="Website of the company")
 
     # Company Code
     company_code = models.CharField(
-        max_length=10,
+        max_length=100,
         unique=True,
         default=generate_company_code,
         editable=False,

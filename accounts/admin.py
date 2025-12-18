@@ -11,11 +11,12 @@ class UserAdmin(admin.ModelAdmin):
         "first_name",
         "last_name",
         "username",
+        "is_event_manager",
         "is_staff",
         "is_active",
     )
     search_fields = ("email", "first_name", "last_name", "username")
-    list_filter = ("is_staff", "is_active")
+    list_filter = ("is_staff", "is_active", "is_event_manager")
     ordering = ("-created_at",)
 
 
