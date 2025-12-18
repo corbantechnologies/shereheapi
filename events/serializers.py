@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from events.models import Event
 from events.utils import send_event_created_email
@@ -44,6 +45,11 @@ class EventSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
+        # Validate start date
+        if attrs.get("start_date"):
+            if attrs["start_date"] < timezone.now().date():
+                raise serializers.ValidationError("Start date must be in the future.")
+
         # Validate date range
         if attrs.get("end_date") and attrs.get("start_date"):
             if attrs["end_date"] < attrs["start_date"]:
