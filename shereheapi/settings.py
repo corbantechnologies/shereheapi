@@ -38,6 +38,9 @@ INSTALLED_APPS = [
     "cloudinary",
     # Local apps
     "accounts",
+    "company",
+    "events",
+    "tickettypes",
 ]
 
 MIDDLEWARE = [
