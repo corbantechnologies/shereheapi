@@ -13,7 +13,7 @@ User = get_user_model()
 
 
 class EventSerializer(serializers.ModelSerializer):
-    created_by = serializers.CharField(source="created_by.username", read_only=True)
+    manager = serializers.CharField(source="manager.username", read_only=True)
     company = serializers.SlugRelatedField(
         queryset=Company.objects.all(), slug_field="company_code"
     )
@@ -30,7 +30,7 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = [
             "id",
-            "created_by",
+            "manager",
             "company",
             "name",
             "description",
@@ -100,7 +100,7 @@ class EventSerializer(serializers.ModelSerializer):
                     ticket_type_data.pop("event", None)
                     TicketType.objects.create(event=event, **ticket_type_data)
 
-            send_event_created_email(event.created_by, event)
+            send_event_created_email(event.manager, event)
             return event
 
     def update(self, instance, validated_data):

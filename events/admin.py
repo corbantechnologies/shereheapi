@@ -6,7 +6,7 @@ from events.models import Event
 class EventAdmin(admin.ModelAdmin):
     list_display = (
         "name",
-        "created_by",
+        "manager",
         "start_date",
         "end_date",
         "venue",
@@ -14,8 +14,8 @@ class EventAdmin(admin.ModelAdmin):
         "event_code",
         "is_closed",
     )
-    list_filter = ("created_by", "is_closed", "capacity", "event_code", "company")
-    search_fields = ("name", "created_by__username")
+    list_filter = ("manager", "is_closed", "capacity", "event_code", "company")
+    search_fields = ("name", "manager__username")
 
 
 admin.site.register(Event, EventAdmin)

@@ -12,7 +12,7 @@ User = get_user_model()
 
 
 class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
-    created_by = models.ForeignKey(
+    manager = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="events"
     )
     company = models.ForeignKey(
