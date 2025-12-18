@@ -55,3 +55,12 @@ class TicketTypeSerializer(serializers.ModelSerializer):
                 )
 
         return attrs
+
+
+class TicketTypeInlineSerializer(TicketTypeSerializer):
+    """
+    Serializer for ticket types when nested within an event.
+    The event field is read-only because it's inferred from the parent event.
+    """
+
+    event = serializers.SlugRelatedField(slug_field="event_code", read_only=True)

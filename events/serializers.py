@@ -5,6 +5,9 @@ from django.utils import timezone
 from events.models import Event
 from events.utils import send_event_created_email
 from company.models import Company
+from tickettypes.models import TicketType
+from tickettypes.serializers import TicketTypeSerializer, TicketTypeInlineSerializer
+from django.db import transaction
 
 User = get_user_model()
 
@@ -19,6 +22,9 @@ class EventSerializer(serializers.ModelSerializer):
     end_date = serializers.DateField(required=False, allow_null=True)
     start_time = serializers.TimeField(required=False, allow_null=True)
     end_time = serializers.TimeField(required=False, allow_null=True)
+    ticket_types = TicketTypeInlineSerializer(
+        many=True, required=False, allow_null=True
+    )
 
     class Meta:
         model = Event
@@ -42,6 +48,7 @@ class EventSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "reference",
+            "ticket_types",
         ]
 
     def validate(self, attrs):
@@ -66,24 +73,44 @@ class EventSerializer(serializers.ModelSerializer):
                 "End time must be after start time on the same day."
             )
 
-        # # Validate ticket_types if provided
-        # ticket_types = attrs.get("ticket_types")
-        # if ticket_types:  # Only validate if ticket_types is provided
-        #     # Validate ticket type quantities against event capacity
-        #     if attrs.get("capacity"):
-        #         total_tickets = sum(
-        #             tt.get("quantity_available", attrs["capacity"] or 0)
-        #             for tt in ticket_types
-        #             if tt.get("quantity_available") is not None
-        #         )
-        #         if total_tickets > attrs["capacity"]:
-        #             raise serializers.ValidationError(
-        #                 "Total ticket quantities cannot exceed event capacity."
-        #             )
+        # Validate ticket_types if provided
+        ticket_types = attrs.get("ticket_types")
+        if ticket_types:  # Only validate if ticket_types is provided
+            # Validate ticket type quantities against event capacity
+            if attrs.get("capacity"):
+                total_tickets = sum(
+                    tt.get("quantity_available", attrs["capacity"] or 0)
+                    for tt in ticket_types
+                    if tt.get("quantity_available") is not None
+                )
+                if total_tickets > attrs["capacity"]:
+                    raise serializers.ValidationError(
+                        "Total ticket quantities cannot exceed event capacity."
+                    )
 
         return attrs
 
     def create(self, validated_data):
-        event = super().create(validated_data)
-        send_event_created_email(event.created_by, event)
-        return event
+        ticket_types_data = validated_data.pop("ticket_types", None)
+        with transaction.atomic():
+            event = Event.objects.create(**validated_data)
+
+            if ticket_types_data:
+                for ticket_type_data in ticket_types_data:
+                    ticket_type_data.pop("event", None)
+                    TicketType.objects.create(event=event, **ticket_type_data)
+
+            send_event_created_email(event.created_by, event)
+            return event
+
+    def update(self, instance, validated_data):
+        ticket_types_data = validated_data.pop("ticket_types", None)
+        with transaction.atomic():
+            event = super().update(instance, validated_data)
+
+            if ticket_types_data:
+                for ticket_type_data in ticket_types_data:
+                    ticket_type_data.pop("event", None)
+                    TicketType.objects.update_or_create(event=event, **ticket_type_data)
+
+            return event
