@@ -3,12 +3,16 @@ from django.contrib.auth import get_user_model
 
 from events.models import Event
 from events.utils import send_event_created_email
+from company.models import Company
 
 User = get_user_model()
 
 
 class EventSerializer(serializers.ModelSerializer):
     created_by = serializers.CharField(source="created_by.username", read_only=True)
+    company = serializers.SlugRelatedField(
+        queryset=Company.objects.all(), slug_field="company_code"
+    )
     image = serializers.ImageField(use_url=True, required=False, allow_null=True)
     start_date = serializers.DateField(required=True)
     end_date = serializers.DateField(required=False, allow_null=True)
