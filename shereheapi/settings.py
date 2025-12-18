@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "accounts",
     "company",
     "events",
+    "tickettypes",
 ]
 
 MIDDLEWARE = [
