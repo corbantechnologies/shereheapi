@@ -40,7 +40,7 @@ def send_event_manager_account_created_email(user):
         )
         params = {
             "from": "Sherehe <noreply@sherehe.co.ke>",
-            "to": [user.email],  # Resend expects a list for 'to'
+            "to": [user.email],
             "subject": "Your Sherehe Account Has Been Created",
             "html": email_body,
         }

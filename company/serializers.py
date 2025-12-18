@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from company.models import Company
+from company.utils import send_company_created_email
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -25,3 +27,8 @@ class CompanySerializer(serializers.ModelSerializer):
             "updated_at",
             "reference",
         ]
+
+    def create(self, validated_data):
+        company = super().create(validated_data)
+        send_company_created_email(company.manager, company)
+        return company

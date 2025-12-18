@@ -5,6 +5,8 @@ from django.core.validators import MinValueValidator
 from django.utils.text import slugify
 
 from accounts.abstracts import UniversalIdModel, TimeStampedModel, ReferenceModel
+from company.models import Company
+from events.utils import generate_event_code
 
 User = get_user_model()
 
@@ -12,6 +14,9 @@ User = get_user_model()
 class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
     created_by = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="events"
+    )
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name="company_events"
     )
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -30,9 +35,12 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
         "event_image", help_text="Image of the event", blank=True, null=True
     )
     is_closed = models.BooleanField(default=False, help_text="Is the event closed?")
-    identity = models.CharField(max_length=2000, unique=True, blank=True)
     cancellation_policy = models.TextField(
         blank=True, null=True, help_text="Cancellation policy for the event"
+    )
+    identity = models.CharField(max_length=2000, unique=True, blank=True)
+    event_code = models.CharField(
+        max_length=2000, unique=True, default=generate_event_code, editable=False
     )
 
     class Meta:

@@ -15,6 +15,7 @@ from accounts.validators import (
     validate_password_symbol,
     validate_password_uppercase,
 )
+from company.models import Company
 
 User = get_user_model()
 
@@ -67,6 +68,8 @@ class EventManagerSerializer(BaseUserSerializer):
     def create(self, validated_data):
         user = self.create_user(validated_data, "is_event_manager")
         send_event_manager_account_created_email(user)
+
+        Company.objects.create(manager=user, name=f"{user.username}'s Company")
         return user
 
 
