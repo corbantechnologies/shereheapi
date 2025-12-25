@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "events",
     "tickettypes",
     "bookings",
+    "tickets",
     "leads",
 ]
 
@@ -187,10 +188,8 @@ RESEND_API_KEY = config("RESEND_API_KEY")
 # Bookings
 PAYMENT_TIMEOUT_MINUTES = config("PAYMENT_TIMEOUT_MINUTES")
 
+# Basic Settings
+BASE_URL = config("BASE_URL")
 SITE_URL = config("SITE_URL")
 SUPPORT_EMAIL = config("SUPPORT_EMAIL")
 SUPPORT_PHONE = config("SUPPORT_PHONE")
-
-# Basic Settings
-DOMAIN = config("DOMAIN")
-BASE_URL = config("BASE_URL")

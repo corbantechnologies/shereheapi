@@ -20,6 +20,7 @@ requests = "*"
 resend = "*"
 whitenoise = "*"
 reportlab = "*"
+qrcode = "*"
 
 [dev-packages]
 
