@@ -35,6 +35,8 @@ class Booking(UniversalIdModel, TimeStampedModel, ReferenceModel):
     # event
     event = models.CharField(max_length=2550, blank=True, null=True)
     # payment
+    checkout_request_id = models.CharField(max_length=2550, blank=True, null=True)
+    callback_url = models.CharField(max_length=255, blank=True, null=True)
     payment_status = models.CharField(
         max_length=20, choices=PAYMENT_STATUS_CHOICES, default="PENDING"
     )
@@ -46,6 +48,8 @@ class Booking(UniversalIdModel, TimeStampedModel, ReferenceModel):
     payment_date = models.DateTimeField(blank=True, null=True)
     mpesa_receipt_number = models.CharField(max_length=2550, blank=True, null=True)
     mpesa_phone_number = models.CharField(max_length=255, blank=True, null=True)
+    # Redirect URL
+    redirect_url = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         verbose_name = "Booking"

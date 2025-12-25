@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "bookings",
     "tickets",
     "leads",
+    "mpesa",
 ]
 
 MIDDLEWARE = [

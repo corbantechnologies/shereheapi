@@ -4,6 +4,7 @@ import logging
 import secrets
 from datetime import datetime
 from django.template.loader import render_to_string
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -15,20 +16,27 @@ def generate_booking_code():
     return f"SPB{year}{secrets.token_hex(6).upper()}"
 
 
-def send_booking_confirmation_email(client, booking):
-    subject = "Booking Confirmation"
-    template_name = "booking_confirmation.html"
-    context = {
-        "client": client,
-        "booking": booking,
-        "current_year": current_year,
-    }
-    html_content = render_to_string(template_name, context)
+def send_booking_confirmation_email(email, booking):
     try:
-        resend.Emails.send(
-            to=[client.email],
-            subject=subject,
-            html_content=html_content,
+        email_body = render_to_string(
+            "booking_confirmation.html",
+            {
+                "booking": booking,
+                "site_url": settings.SITE_URL,
+                "support_email": settings.SUPPORT_EMAIL,
+                "support_phone": settings.SUPPORT_PHONE,
+                "current_year": current_year,
+            },
         )
+        params = {
+            "from": "Sherehe Tickets Kenya <noreply@sherehe.co.ke>",
+            "to": [email],
+            "subject": "Your Sherehe Booking Has Been Confirmed",
+            "html": email_body,
+        }
+        response = resend.Emails.send(params)
+        logger.info(f"Email sent to {email}: {response}")
+        return response
     except Exception as e:
         logger.error(f"Failed to send booking confirmation email: {str(e)}")
+        return None

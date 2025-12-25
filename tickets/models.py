@@ -7,6 +7,7 @@ from io import BytesIO
 
 from accounts.abstracts import UniversalIdModel, TimeStampedModel, ReferenceModel
 from bookings.models import Booking
+from tickettypes.models import TicketType
 from tickets.utils import generate_ticket_code
 
 
@@ -14,7 +15,13 @@ class Ticket(UniversalIdModel, TimeStampedModel, ReferenceModel):
     booking = models.ForeignKey(
         Booking, on_delete=models.CASCADE, related_name="tickets"
     )
-    ticket_type = models.CharField(max_length=1000, blank=True, null=True)
+    ticket_type = models.ForeignKey(
+        TicketType,
+        on_delete=models.CASCADE,
+        related_name="ticket_types",
+        blank=True,
+        null=True,
+    )
     ticket_code = models.CharField(
         max_length=100, unique=True, default=generate_ticket_code, editable=False
     )
@@ -32,10 +39,6 @@ class Ticket(UniversalIdModel, TimeStampedModel, ReferenceModel):
         )
 
     def save(self, *args, **kwargs):
-        if not self.ticket_type:
-            self.ticket_type = (
-                f"{self.booking.ticket_type.name} - {self.booking.ticket_type.price}"
-            )
 
         if not self.qr_code:
             qr = qrcode.QRCode(
