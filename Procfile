@@ -1,0 +1,1 @@
+web: python manage.py migrate && gunicorn --timeout 60 shereheapi.wsgi

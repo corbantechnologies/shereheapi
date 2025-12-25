@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Booking Confirmation</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Inter', Arial, Helvetica, sans-serif;
+                font-size: 16px;
+                color: #2D3748;
+                background-color: #F7FAFC;
+                line-height: 1.6;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 40px auto;
+                background-color: #FFFFFF;
+                border-radius: 12px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                overflow: hidden;
+                border: 1px solid #E2E8F0;
+            }
+
+            .header {
+                padding: 32px;
+                text-align: center;
+                background: linear-gradient(135deg, #2B6CB0 0%, #3182CE 100%);
+                color: #FFFFFF;
+                border-top-left-radius: 12px;
+                border-top-right-radius: 12px;
+            }
+
+            .header h1 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 600;
+            }
+
+            .content {
+                padding: 32px;
+            }
+
+            .content p {
+                margin: 0 0 16px;
+            }
+
+            .content h2 {
+                font-size: 22px;
+                font-weight: 600;
+                color: #1A202C;
+                margin: 32px 0 16px;
+                border-bottom: 2px solid #E2E8F0;
+                padding-bottom: 8px;
+            }
+
+            .details-table,
+            .tickets-table,
+            .qr-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 15px;
+            }
+
+            .details-table td,
+            .tickets-table td,
+            .qr-table td {
+                padding: 12px 8px;
+                vertical-align: top;
+            }
+
+            .details-table td:first-child,
+            .tickets-table td:first-child,
+            .qr-table td:first-child {
+                font-weight: 600;
+                color: #4A5568;
+                width: 35%;
+            }
+
+            .details-table tr:nth-child(odd),
+            .tickets-table tr:nth-child(odd),
+            .qr-table tr:nth-child(odd) {
+                background-color: #F7FAFC;
+            }
+
+            .qr-table img {
+                max-width: 120px;
+                height: auto;
+                border-radius: 8px;
+                border: 1px solid #E2E8F0;
+            }
+
+            .instructions p {
+                color: #4A5568;
+            }
+
+            .instructions a {
+                color: #2B6CB0;
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .instructions a:hover {
+                text-decoration: underline;
+            }
+
+            .footer {
+                padding: 20px;
+                text-align: center;
+                background-color: #EDF2F7;
+                border-bottom-left-radius: 12px;
+                border-bottom-right-radius: 12px;
+            }
+
+            .footer p {
+                margin: 0;
+                font-size: 14px;
+                color: #718096;
+            }
+
+            @media only screen and (max-width: 600px) {
+                .container {
+                    margin: 20px;
+                }
+
+                .header {
+                    padding: 24px;
+                }
+
+                .header h1 {
+                    font-size: 24px;
+                }
+
+                .content {
+                    padding: 24px;
+                }
+
+                .content h2 {
+                    font-size: 20px;
+                }
+
+                .details-table td,
+                .tickets-table td,
+                .qr-table td {
+                    display: block;
+                    width: 100%;
+                    padding: 8px 0;
+                }
+
+                .details-table td:first-child,
+                .tickets-table td:first-child,
+                .qr-table td:first-child {
+                    width: 100%;
+                }
+
+                .qr-table img {
+                    max-width: 100px;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <table class="container" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="header">
+                    <h1>Booking Confirmation</h1>
+                </td>
+            </tr>
+            <tr>
+                <td class="content">
+                    <p>Dear {{ booking.name }},</p>
+                    <p>
+                        Thank you for your booking! Below are the details of your reservation for the event <strong>{{ booking.event }}</strong>.
+                    </p>
+
+                    <h2>Booking Details</h2>
+                    <table class="details-table" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td>Description:</td>
+                            <td>{{ booking.description }}</td>
+                        </tr>
+                        <tr>
+                            <td>Reference:</td>
+                            <td>{{ booking.reference }}</td>
+                        </tr>
+                        <tr>
+                            <td>Event:</td>
+                            <td>{{ booking.event }}</td>
+                        </tr>
+                        <tr>
+                            <td>Date:</td>
+                            <td>{{ booking.ticket_type.event.start_date }}</td>
+                        </tr>
+                        {% if booking.ticket_type.event.end_date %}
+                        <tr>
+                            <td>End Date:</td>
+                            <td>{{ booking.ticket_type.event.end_date }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if booking.ticket_type.event.start_time %}
+                        <tr>
+                            <td>Time:</td>
+                            <td>{{ booking.ticket_type.event.start_time }} - {{ booking.ticket_type.event.end_time }}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td>Venue:</td>
+                            <td>{{ booking.ticket_type.event.venue }}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Tickets:</td>
+                            <td>{{ booking.quantity }}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Amount:</td>
+                            <td>{{ booking.amount }} {{ booking.currency }}</td>
+                        </tr>
+                        <tr>
+                            <td>Payment Status:</td>
+                            <td>{{ booking.payment_status_description }}</td>
+                        </tr>
+                    </table>
+
+                    <h2>Tickets</h2>
+                    <table class="tickets-table" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td>Ticket Type:</td>
+                            <td>{{ booking.ticket_type.name }}</td>
+                        </tr>
+                        <tr>
+                            <td>Ticket Quantity:</td>
+                            <td>{{ booking.quantity }}</td>
+                        </tr>
+                    </table>
+
+                    <h2>QR Codes</h2>
+                    <table class="qr-table" cellpadding="0" cellspacing="0">
+                        {% for ticket in booking.tickets.all %}
+                        <tr>
+                            <td>Ticket Type:</td>
+                            <td>{{ ticket.ticket_type.name }}</td>
+                        </tr>
+                        <tr>
+                            <td>QR Code:</td>
+                            <td><img src="{{ ticket.qr_code }}" alt="QR Code"></td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+
+                    <h2>Instructions</h2>
+                    <p class="instructions">
+                        Please present the QR code(s) at the event entrance for verification.
+                        Ensure you have this email accessible on your device or print it out.
+                    </p>
+                    <p class="instructions">
+                        If you have any questions, contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td class="footer">
+                    <p>© {{ current_year }} Event Booking System. All rights reserved.</p>
+                </td>
+            </tr>
+        </table>
+    </body>
+
+</html>
