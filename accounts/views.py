@@ -95,7 +95,9 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "username"
 
     def get_queryset(self):
-        return self.queryset.filter(username=self.request.user.username)
+        return self.queryset.filter(
+            username=self.request.user.username
+        ).prefetch_related("companies")
 
 
 """
