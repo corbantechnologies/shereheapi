@@ -7,7 +7,7 @@ from company.mixins import EventManagerOwnedFilterMixin
 
 
 class CompanyListCreateView(EventManagerOwnedFilterMixin, generics.ListCreateAPIView):
-    queryset = Company.objects.all()
+    queryset = Company.objects.all().prefetch_related("company_events")
     serializer_class = CompanySerializer
     permission_classes = [
         IsEventManagerOwnerOrReadOnly,
@@ -18,9 +18,9 @@ class CompanyListCreateView(EventManagerOwnedFilterMixin, generics.ListCreateAPI
 
 
 class CompanyDetailView(
-    EventManagerOwnedFilterMixin, generics.RetrieveUpdateDestroyAPIView
+    EventManagerOwnedFilterMixin, generics.RetrieveUpdateAPIViewAPIView
 ):
-    queryset = Company.objects.all()
+    queryset = Company.objects.all().prefetch_related("company_events")
     serializer_class = CompanySerializer
     permission_classes = [
         IsEventManagerOwnerOrReadOnly,

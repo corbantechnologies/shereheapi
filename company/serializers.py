@@ -3,6 +3,7 @@ from rest_framework.validators import UniqueValidator
 
 from company.models import Company
 from company.utils import send_company_created_email
+from events.serializers import EventSerializer
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -12,6 +13,7 @@ class CompanySerializer(serializers.ModelSerializer):
     name = serializers.CharField(
         validators=[UniqueValidator(queryset=Company.objects.all())]
     )
+    company_events = EventSerializer(many=True, read_only=True)
 
     class Meta:
         model = Company
@@ -30,6 +32,7 @@ class CompanySerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "reference",
+            "company_events",
         ]
 
     def create(self, validated_data):
