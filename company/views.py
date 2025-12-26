@@ -18,7 +18,7 @@ class CompanyListCreateView(EventManagerOwnedFilterMixin, generics.ListCreateAPI
 
 
 class CompanyDetailView(
-    EventManagerOwnedFilterMixin, generics.RetrieveUpdateAPIViewAPIView
+    EventManagerOwnedFilterMixin, generics.RetrieveUpdateAPIView
 ):
     queryset = Company.objects.all().prefetch_related("company_events")
     serializer_class = CompanySerializer
