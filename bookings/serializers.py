@@ -3,6 +3,7 @@ from rest_framework import serializers
 from bookings.models import Booking
 from tickettypes.models import TicketType
 from leads.models import Lead
+from tickets.serializers import TicketSerializer
 
 
 class BookingSerializer(serializers.ModelSerializer):
@@ -12,6 +13,7 @@ class BookingSerializer(serializers.ModelSerializer):
     quantity = serializers.IntegerField(min_value=1, default=1)
     ticket_type_info = serializers.SerializerMethodField()
     # TODO: Add tickets
+    tickets = TicketSerializer(many=True, read_only=True)
 
     class Meta:
         model = Booking
@@ -37,6 +39,8 @@ class BookingSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "reference",
+            "tickets",
+            "ticket_type_info",
         ]
 
     def get_ticket_type_info(self, obj):

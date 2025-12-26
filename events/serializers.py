@@ -6,7 +6,7 @@ from events.models import Event
 from events.utils import send_event_created_email
 from company.models import Company
 from tickettypes.models import TicketType
-from tickettypes.serializers import TicketTypeSerializer, TicketTypeInlineSerializer
+from tickettypes.serializers import TicketTypeSerializer
 from django.db import transaction
 
 User = get_user_model()
@@ -22,7 +22,7 @@ class EventSerializer(serializers.ModelSerializer):
     end_date = serializers.DateField(required=False, allow_null=True)
     start_time = serializers.TimeField(required=False, allow_null=True)
     end_time = serializers.TimeField(required=False, allow_null=True)
-    ticket_types = TicketTypeInlineSerializer(
+    ticket_types = TicketTypeSerializer(
         many=True, required=False, allow_null=True
     )
 

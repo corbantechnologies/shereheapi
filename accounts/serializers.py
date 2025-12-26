@@ -16,6 +16,7 @@ from accounts.validators import (
     validate_password_uppercase,
 )
 from company.models import Company
+from company.serializers import CompanySerializer
 
 User = get_user_model()
 
@@ -37,6 +38,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
         ],
     )
     avatar = serializers.ImageField(required=False, use_url=True)
+    companies = CompanySerializer(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -50,9 +52,11 @@ class BaseUserSerializer(serializers.ModelSerializer):
             "phone_number",
             "country",
             "is_event_manager",
+            "is_premium",
             "is_staff",
             "is_active",
             "is_superuser",
+            "companies",
         ]
 
     def create_user(self, validated_data, role_field):
