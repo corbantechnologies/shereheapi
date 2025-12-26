@@ -52,6 +52,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
             "phone_number",
             "country",
             "is_event_manager",
+            "is_premium",
             "is_staff",
             "is_active",
             "is_superuser",
