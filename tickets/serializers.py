@@ -39,4 +39,5 @@ class TicketSerializer(serializers.ModelSerializer):
             "payment_date": obj.booking.payment_date,
             "mpesa_receipt_number": obj.booking.mpesa_receipt_number,
             "mpesa_phone_number": obj.booking.mpesa_phone_number,
+            "reference": obj.booking.reference,
         }
