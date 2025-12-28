@@ -74,6 +74,9 @@ class User(
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
 
+    # Business
+    is_premium = models.BooleanField(default=False, help_text="Is the user a premium user?")
+
     objects = UserManager()
 
     REQUIRED_FIELDS = ["password", "first_name", "last_name"]

@@ -2,12 +2,14 @@ from rest_framework import serializers
 
 from tickettypes.models import TicketType
 from events.models import Event
+from bookings.serializers import BookingSerializer
 
 
 class TicketTypeSerializer(serializers.ModelSerializer):
     event = serializers.SlugRelatedField(
         slug_field="event_code", queryset=Event.objects.all()
     )
+    bookings = BookingSerializer(many=True, read_only=True)
 
     class Meta:
         model = TicketType
@@ -20,6 +22,7 @@ class TicketTypeSerializer(serializers.ModelSerializer):
             "ticket_type_code",
             "created_at",
             "updated_at",
+            "bookings",
         ]
 
     def validate(self, attrs):

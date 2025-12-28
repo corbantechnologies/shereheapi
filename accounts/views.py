@@ -42,6 +42,7 @@ class TokenView(APIView):
                     "phone_number": user.phone_number,
                     "country": user.country,
                     "is_event_manager": user.is_event_manager,
+                    "is_premium": user.is_premium,
                     "is_staff": user.is_staff,
                     "is_active": user.is_active,
                     "is_superuser": user.is_superuser,
@@ -95,7 +96,9 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "username"
 
     def get_queryset(self):
-        return self.queryset.filter(username=self.request.user.username)
+        return self.queryset.filter(
+            username=self.request.user.username
+        ).prefetch_related("companies")
 
 
 """

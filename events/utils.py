@@ -14,7 +14,7 @@ def generate_event_code():
     year = datetime.now().year % 100
     characters = string.ascii_uppercase + string.digits
     random_characters = "".join(secrets.choice(characters) for _ in range(8))
-    return f"SPC-{year}{random_characters}"
+    return f"SPE-{year}{random_characters}"
 
 
 def send_event_created_email(user, event):
