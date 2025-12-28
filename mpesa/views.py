@@ -121,7 +121,7 @@ class MpesaPaymentCreateView(APIView):
                 logger.info(f"M-Pesa STK Push response: {response_data}")
 
                 if response_data.get("ResponseCode") == "0":
-                    booking.order_tracking_id = response_data.get("CheckoutRequestID")
+                    booking.checkout_request_id = response_data.get("CheckoutRequestID")
                     booking.callback_url = settings.MPESA_CALLBACK_URL
                     booking.payment_method = "M-Pesa STK Push"
                     booking.mpesa_phone_number = phone_number
