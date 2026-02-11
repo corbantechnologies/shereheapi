@@ -14,7 +14,9 @@ class BookingSerializer(serializers.ModelSerializer):
     )
     quantity = serializers.IntegerField(min_value=1, default=1)
     ticket_type_info = serializers.SerializerMethodField()
-    coupon_code = serializers.CharField(write_only=True, required=False)
+    coupon = serializers.SlugRelatedField(
+        slug_field="code", queryset=Coupon.objects.all(), required=False
+    )
     # TODO: Add tickets
     tickets = TicketSerializer(many=True, read_only=True)
 
@@ -44,7 +46,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "reference",
             "tickets",
             "ticket_type_info",
-            "coupon_code",
+            "coupon",
         ]
 
     def get_ticket_type_info(self, obj):
@@ -65,30 +67,29 @@ class BookingSerializer(serializers.ModelSerializer):
                 )
 
         # Coupon Validation
-        coupon_code = attrs.get("coupon_code")
-        if coupon_code:
-            try:
-                coupon = Coupon.objects.get(code=coupon_code)
-            except Coupon.DoesNotExist:
+        coupon = attrs.get("coupon")
+        if coupon:
+            # Coupon is already a model instance from SlugRelatedField validation
+            if not coupon.is_active:
+                raise serializers.ValidationError({"coupon": "Coupon is inactive"})
+
+            if coupon.valid_from > timezone.now():
                 raise serializers.ValidationError(
-                    {"coupon_code": "Invalid coupon code"}
+                    {"coupon": "Coupon is not yet active"}
                 )
 
-            if not coupon.is_active:
-                raise serializers.ValidationError({"coupon_code": "Coupon is inactive"})
-
-            if coupon.valid_from > timezone.now() or coupon.valid_to < timezone.now():
-                raise serializers.ValidationError({"coupon_code": "Coupon is expired"})
+            if coupon.valid_to < timezone.now():
+                raise serializers.ValidationError({"coupon": "Coupon has expired"})
 
             if coupon.usage_limit > 0 and coupon.usage_count >= coupon.usage_limit:
                 raise serializers.ValidationError(
-                    {"coupon_code": "Coupon usage limit reached"}
+                    {"coupon": "Coupon usage limit reached"}
                 )
 
             # Check Event
             if coupon.event != ticket_type.event:
                 raise serializers.ValidationError(
-                    {"coupon_code": "Coupon is not valid for this event"}
+                    {"coupon": "Coupon is not valid for this event"}
                 )
 
             # Check Ticket Type
@@ -97,7 +98,7 @@ class BookingSerializer(serializers.ModelSerializer):
                 and ticket_type not in coupon.ticket_type.all()
             ):
                 raise serializers.ValidationError(
-                    {"coupon_code": "Coupon is not valid for this ticket type"}
+                    {"coupon": "Coupon is not valid for this ticket type"}
                 )
 
             attrs["coupon"] = coupon
@@ -105,9 +106,7 @@ class BookingSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        # Remove coupon_code from validated_data as it's not a field on the model
-        if "coupon_code" in validated_data:
-            del validated_data["coupon_code"]
+        # Coupon is now a field on the Booking model, so we keep it in validated_data
 
         booking = Booking.objects.create(**validated_data)
         booking.save()
