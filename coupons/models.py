@@ -34,7 +34,7 @@ class Coupon(TimeStampedModel, ReferenceModel, UniversalIdModel):
         max_length=10, unique=True, default=generate_code, editable=False
     )
     discount_type = models.CharField(
-        max_length=20, choices=DISCOUNT_TYPE_CHOICES, default="FIXED"
+        max_length=20, choices=DISCOUNT_TYPE_CHOICES, default="PERCENTAGE"
     )
     discount_value = models.DecimalField(
         max_digits=10, decimal_places=2, help_text="Cannot be negative, Cannot be blank"
@@ -44,6 +44,8 @@ class Coupon(TimeStampedModel, ReferenceModel, UniversalIdModel):
     usage_limit = models.PositiveIntegerField(default=0, help_text="0 means unlimited")
     usage_count = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    # Adding Email incase we are emailing it to someone specific
+    email = models.EmailField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Coupon"
@@ -52,10 +54,6 @@ class Coupon(TimeStampedModel, ReferenceModel, UniversalIdModel):
 
     def __str__(self):
         return self.code
-
-    def save(self, *args, **kwargs):
-        self.usage_count += 1
-        super().save(*args, **kwargs)
 
     def apply_discount(self, ticket_type):
         if self.discount_type == "FIXED":

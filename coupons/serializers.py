@@ -58,5 +58,6 @@ class CouponSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "reference",
+            "email",
             "event_details",
         )
