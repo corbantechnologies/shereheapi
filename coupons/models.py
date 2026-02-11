@@ -53,7 +53,7 @@ class Coupon(TimeStampedModel, ReferenceModel, UniversalIdModel):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return self.code
+        return f"{self.code} - {self.discount_type} {self.discount_value} {self.event.name}"
 
     def apply_discount(self, ticket_type):
         if self.discount_type == "FIXED":

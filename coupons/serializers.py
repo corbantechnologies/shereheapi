@@ -5,6 +5,12 @@ from events.models import Event
 from tickettypes.models import TicketType
 
 
+class TicketTypeSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TicketType
+        fields = ["ticket_type_code", "name", "price"]
+
+
 class CouponSerializer(serializers.ModelSerializer):
     manager = serializers.CharField(source="manager.username", read_only=True)
     event = serializers.SlugRelatedField(
@@ -17,6 +23,9 @@ class CouponSerializer(serializers.ModelSerializer):
         required=False,
     )
     event_details = serializers.SerializerMethodField()
+    ticket_type_details = TicketTypeSimpleSerializer(
+        source="ticket_type", many=True, read_only=True
+    )
 
     def get_event_details(self, obj):
         return {
@@ -60,4 +69,5 @@ class CouponSerializer(serializers.ModelSerializer):
             "reference",
             "email",
             "event_details",
+            "ticket_type_details",
         )
