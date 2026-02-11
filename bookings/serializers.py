@@ -116,6 +116,14 @@ class BookingSerializer(serializers.ModelSerializer):
             booking.coupon.usage_count += 1
             booking.coupon.save()
 
+            # check if usage limit reached
+            if (
+                booking.coupon.usage_limit > 0
+                and booking.coupon.usage_count >= booking.coupon.usage_limit
+            ):
+                booking.coupon.is_active = False
+                booking.coupon.save()
+
         Lead.objects.create(
             name=booking.name,
             email=booking.email,
