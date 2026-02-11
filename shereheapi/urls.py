@@ -9,5 +9,6 @@ urlpatterns = [
     path("api/v1/tickettypes/", include("tickettypes.urls")),
     path("api/v1/bookings/", include("bookings.urls")),
     path("api/v1/tickets/", include("tickets.urls")),
+    path("api/v1/coupons/", include("coupons.urls")),
     path("api/v1/mpesa/", include("mpesa.urls")),
 ]

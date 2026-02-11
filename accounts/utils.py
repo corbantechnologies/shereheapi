@@ -11,9 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 def generate_reference():
-    characters = string.ascii_letters + string.digits
-    random_string = "".join(secrets.choice(characters) for _ in range(12))
-    return random_string.upper()
+    characters = string.digits
+    year = datetime.now().year % 100
+    random_string = "".join(secrets.choice(characters) for _ in range(20))
+    return f"CTLGS-{year}{random_string}"
 
 
 def generate_username():
