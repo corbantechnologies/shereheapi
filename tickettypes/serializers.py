@@ -22,6 +22,7 @@ class TicketTypeSerializer(serializers.ModelSerializer):
             "ticket_type_code",
             "created_at",
             "updated_at",
+            "reference",
             "bookings",
         ]
 
