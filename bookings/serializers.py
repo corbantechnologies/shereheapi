@@ -4,6 +4,8 @@ from bookings.models import Booking
 from tickettypes.models import TicketType
 from leads.models import Lead
 from tickets.serializers import TicketSerializer
+from coupons.models import Coupon
+from django.utils import timezone
 
 
 class BookingSerializer(serializers.ModelSerializer):
@@ -12,6 +14,7 @@ class BookingSerializer(serializers.ModelSerializer):
     )
     quantity = serializers.IntegerField(min_value=1, default=1)
     ticket_type_info = serializers.SerializerMethodField()
+    coupon_code = serializers.CharField(write_only=True, required=False)
     # TODO: Add tickets
     tickets = TicketSerializer(many=True, read_only=True)
 
@@ -41,6 +44,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "reference",
             "tickets",
             "ticket_type_info",
+            "coupon_code",
         ]
 
     def get_ticket_type_info(self, obj):
@@ -60,11 +64,58 @@ class BookingSerializer(serializers.ModelSerializer):
                     f"Only {ticket_type.quantity_available} tickets are available for this ticket type."
                 )
 
+        # Coupon Validation
+        coupon_code = attrs.get("coupon_code")
+        if coupon_code:
+            try:
+                coupon = Coupon.objects.get(code=coupon_code)
+            except Coupon.DoesNotExist:
+                raise serializers.ValidationError(
+                    {"coupon_code": "Invalid coupon code"}
+                )
+
+            if not coupon.is_active:
+                raise serializers.ValidationError({"coupon_code": "Coupon is inactive"})
+
+            if coupon.valid_from > timezone.now() or coupon.valid_to < timezone.now():
+                raise serializers.ValidationError({"coupon_code": "Coupon is expired"})
+
+            if coupon.usage_limit > 0 and coupon.usage_count >= coupon.usage_limit:
+                raise serializers.ValidationError(
+                    {"coupon_code": "Coupon usage limit reached"}
+                )
+
+            # Check Event
+            if coupon.event != ticket_type.event:
+                raise serializers.ValidationError(
+                    {"coupon_code": "Coupon is not valid for this event"}
+                )
+
+            # Check Ticket Type
+            if (
+                coupon.ticket_type.exists()
+                and ticket_type not in coupon.ticket_type.all()
+            ):
+                raise serializers.ValidationError(
+                    {"coupon_code": "Coupon is not valid for this ticket type"}
+                )
+
+            attrs["coupon"] = coupon
+
         return attrs
 
     def create(self, validated_data):
+        # Remove coupon_code from validated_data as it's not a field on the model
+        if "coupon_code" in validated_data:
+            del validated_data["coupon_code"]
+
         booking = Booking.objects.create(**validated_data)
         booking.save()
+
+        # Increment coupon usage
+        if booking.coupon:
+            booking.coupon.save()  # The save method increments usage_count
+
         Lead.objects.create(
             name=booking.name,
             email=booking.email,

@@ -1,14 +1,9 @@
-from django.urls import path
-
-from coupons.views import CouponListCreateView, CouponRetrieveUpdateDestroyView
+from rest_framework.routers import DefaultRouter
+from coupons.views import CouponViewSet
 
 app_name = "coupons"
 
-urlpatterns = [
-    path("", CouponListCreateView.as_view(), name="coupon-list-create"),
-    path(
-        "<str:reference>",
-        CouponRetrieveUpdateDestroyView.as_view(),
-        name="coupon-retrieve-update-destroy",
-    ),
-]
+router = DefaultRouter()
+router.register("", CouponViewSet, basename="coupons")
+
+urlpatterns = router.urls

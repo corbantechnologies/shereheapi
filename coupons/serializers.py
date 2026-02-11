@@ -27,6 +27,18 @@ class CouponSerializer(serializers.ModelSerializer):
             "end_date": obj.event.end_date,
         }
 
+    def validate(self, attrs):
+        event = attrs.get("event")
+        ticket_types = attrs.get("ticket_type", [])
+
+        if ticket_types:
+            for ticket_type in ticket_types:
+                if ticket_type.event != event:
+                    raise serializers.ValidationError(
+                        f"Ticket type {ticket_type.name} does not belong to event {event.name}"
+                    )
+        return attrs
+
     class Meta:
         model = Coupon
         fields = (

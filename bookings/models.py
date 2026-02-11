@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator
 from bookings.utils import generate_booking_code
 from accounts.abstracts import UniversalIdModel, TimeStampedModel, ReferenceModel
 from tickettypes.models import TicketType
+from coupons.models import Coupon
 
 
 class Booking(UniversalIdModel, TimeStampedModel, ReferenceModel):
@@ -22,6 +23,13 @@ class Booking(UniversalIdModel, TimeStampedModel, ReferenceModel):
 
     ticket_type = models.ForeignKey(
         TicketType, on_delete=models.CASCADE, related_name="bookings"
+    )
+    coupon = models.ForeignKey(
+        Coupon,
+        on_delete=models.SET_NULL,
+        related_name="bookings",
+        blank=True,
+        null=True,
     )
     name = models.CharField(max_length=255)
     email = models.EmailField(blank=True, null=True)
@@ -57,7 +65,20 @@ class Booking(UniversalIdModel, TimeStampedModel, ReferenceModel):
         ordering = ["-created_at"]
 
     def save(self, *args, **kwargs):
-        self.amount = self.ticket_type.price * self.quantity
+        if self.coupon:
+            if self.coupon.discount_type == "FIXED":
+                self.amount = (
+                    self.ticket_type.price * self.quantity
+                ) - self.coupon.discount_value
+            elif self.coupon.discount_type == "PERCENTAGE":
+                self.amount = (self.ticket_type.price * self.quantity) - (
+                    (self.ticket_type.price * self.quantity)
+                    * self.coupon.discount_value
+                    / 100
+                )
+        else:
+            self.amount = self.ticket_type.price * self.quantity
+
         self.description = f"Booking for {self.quantity} tickets of {self.ticket_type.name} by {self.name} ({self.phone})"
         self.event = self.ticket_type.event.name
         super().save(*args, **kwargs)
