@@ -1,6 +1,6 @@
-from rest_framework import viewsets, status
+from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from django.utils import timezone
 
@@ -10,17 +10,37 @@ from company.permissions import IsEventManagerOwnerOrReadOnly
 from tickettypes.models import TicketType
 
 
-class CouponViewSet(viewsets.ModelViewSet):
+class CouponListCreateView(generics.ListCreateAPIView):
+    serializer_class = CouponSerializer
+    permission_classes = [IsEventManagerOwnerOrReadOnly]
+
+    def get_queryset(self):
+        queryset = Coupon.objects.all()
+        event_code = self.request.query_params.get("event_code")
+        if event_code:
+            queryset = queryset.filter(event__event_code=event_code)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(manager=self.request.user)
+
+
+class CouponRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
     permission_classes = [IsEventManagerOwnerOrReadOnly]
     lookup_field = "reference"
 
-    def perform_create(self, serializer):
-        serializer.save(manager=self.request.user)
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
-    def validate(self, request):
+
+class CouponValidateView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
         code = request.data.get("code")
         event_code = request.data.get("event_code")
         ticket_type_code = request.data.get("ticket_type_code")
@@ -43,9 +63,15 @@ class CouponViewSet(viewsets.ModelViewSet):
                 {"error": "Coupon is inactive"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        if coupon.valid_from > timezone.now() or coupon.valid_to < timezone.now():
+        if coupon.valid_from > timezone.now():
             return Response(
-                {"error": "Coupon is expired"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Coupon is not yet active"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if coupon.valid_to < timezone.now():
+            return Response(
+                {"error": "Coupon has expired"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         if coupon.usage_limit > 0 and coupon.usage_count >= coupon.usage_limit:
@@ -82,11 +108,6 @@ class CouponViewSet(viewsets.ModelViewSet):
             discount_value = coupon.apply_discount(ticket_type)
             discount_amount = ticket_type.price - discount_value
         else:
-            # If no ticket type provided, just return coupon info?
-            # Or requires ticket type to calculate discount?
-            # Logic: If ticket type provided, return exact discount.
-            # If not, return general info.
-            # For now, let's assume specific booking uses ticket type.
             discount_amount = 0
 
         return Response(
