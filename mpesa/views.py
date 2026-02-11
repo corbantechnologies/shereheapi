@@ -262,7 +262,7 @@ class MpesaCallbackView(APIView):
         )
 
         booking.status = "CONFIRMED"
-        booking.payment_status = "Completed"
+        booking.payment_status = "COMPLETED"
         booking.payment_date = timezone.now()
         booking.mpesa_receipt_number = confirmation_code
         booking.payment_account = payment_account
