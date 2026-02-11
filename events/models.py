@@ -12,9 +12,7 @@ User = get_user_model()
 
 
 class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
-    manager = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="events"
-    )
+    manager = models.ForeignKey(User, on_delete=models.CASCADE, related_name="events")
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, related_name="company_events"
     )
@@ -46,7 +44,7 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
     class Meta:
         verbose_name = "Event"
         verbose_name_plural = "Events"
-        ordering = ["start_date"]
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.name
