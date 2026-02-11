@@ -113,7 +113,8 @@ class BookingSerializer(serializers.ModelSerializer):
 
         # Increment coupon usage
         if booking.coupon:
-            booking.coupon.save()  # The save method increments usage_count
+            booking.coupon.usage_count += 1
+            booking.coupon.save()
 
         Lead.objects.create(
             name=booking.name,
