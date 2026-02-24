@@ -39,6 +39,10 @@ class TicketType(UniversalIdModel, TimeStampedModel, ReferenceModel):
         blank=True,
         help_text="When ticket sales end. Leave blank to sell until event ends.",
     )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Uncheck to hide this ticket type or stop sales manually.",
+    )
     ticket_type_code = models.CharField(
         max_length=255, unique=True, default=generate_ticket_type_code, editable=False
     )
@@ -55,12 +59,36 @@ class TicketType(UniversalIdModel, TimeStampedModel, ReferenceModel):
     def is_currently_on_sale(self):
         from django.utils import timezone
 
+        if not self.is_active:
+            return False
+
         now = timezone.now()
         if self.sales_start and now < self.sales_start:
             return False
         if self.sales_end and now > self.sales_end:
             return False
         return True
+
+    @property
+    def status(self):
+        if not self.is_active:
+            return "PAUSED"
+
+        if self.is_limited and self.quantity_available is not None:
+            if self.tickets_sold >= self.quantity_available:
+                return "SOLD_OUT"
+
+        from django.utils import timezone
+
+        now = timezone.now()
+
+        if self.sales_start and now < self.sales_start:
+            return "UPCOMING"
+
+        if self.sales_end and now > self.sales_end:
+            return "ENDED"
+
+        return "ON_SALE"
 
     class Meta:
         verbose_name = "Ticket Type"

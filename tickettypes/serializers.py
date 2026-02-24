@@ -21,6 +21,8 @@ class TicketTypeSerializer(serializers.ModelSerializer):
             "is_limited",
             "sales_start",
             "sales_end",
+            "is_active",
+            "status",
             "ticket_type_code",
             "created_at",
             "updated_at",

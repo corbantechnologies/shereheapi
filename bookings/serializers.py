@@ -60,9 +60,24 @@ class BookingSerializer(serializers.ModelSerializer):
         ticket_type = attrs.get("ticket_type")
         quantity = attrs.get("quantity")
 
-        if not ticket_type.is_currently_on_sale:
+        status = ticket_type.status
+        if status == "PAUSED":
             raise serializers.ValidationError(
-                {"ticket_type": "This ticket type is not currently available for sale."}
+                {
+                    "ticket_type": "This ticket type is currently paused and not available for sale."
+                }
+            )
+        elif status == "UPCOMING":
+            raise serializers.ValidationError(
+                {"ticket_type": "Sales for this ticket type have not started yet."}
+            )
+        elif status == "ENDED":
+            raise serializers.ValidationError(
+                {"ticket_type": "Sales for this ticket type have ended."}
+            )
+        elif status == "SOLD_OUT":
+            raise serializers.ValidationError(
+                {"ticket_type": "This ticket type is sold out."}
             )
 
         total_type_tickets_sold = ticket_type.tickets_sold

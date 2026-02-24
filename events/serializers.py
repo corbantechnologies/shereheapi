@@ -41,6 +41,7 @@ class EventSerializer(serializers.ModelSerializer):
             "venue",
             "capacity",
             "image",
+            "is_published",
             "is_closed",
             "cancellation_policy",
             "identity",
