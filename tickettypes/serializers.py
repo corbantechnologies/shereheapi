@@ -19,6 +19,8 @@ class TicketTypeSerializer(serializers.ModelSerializer):
             "price",
             "quantity_available",
             "is_limited",
+            "sales_start",
+            "sales_end",
             "ticket_type_code",
             "created_at",
             "updated_at",

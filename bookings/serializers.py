@@ -60,10 +60,32 @@ class BookingSerializer(serializers.ModelSerializer):
         ticket_type = attrs.get("ticket_type")
         quantity = attrs.get("quantity")
 
+        if not ticket_type.is_currently_on_sale:
+            raise serializers.ValidationError(
+                {"ticket_type": "This ticket type is not currently available for sale."}
+            )
+
+        total_type_tickets_sold = ticket_type.tickets_sold
+        total_event_tickets_sold = sum(
+            t.tickets_sold for t in ticket_type.event.ticket_types.all()
+        )
+
         if ticket_type.is_limited and ticket_type.quantity_available is not None:
-            if quantity > ticket_type.quantity_available:
+            if quantity + total_type_tickets_sold > ticket_type.quantity_available:
+                available = ticket_type.quantity_available - total_type_tickets_sold
                 raise serializers.ValidationError(
-                    f"Only {ticket_type.quantity_available} tickets are available for this ticket type."
+                    {
+                        "ticket_type": f"Only {max(0, available)} tickets remaining for this ticket type."
+                    }
+                )
+
+        if ticket_type.event.capacity is not None:
+            if quantity + total_event_tickets_sold > ticket_type.event.capacity:
+                available = ticket_type.event.capacity - total_event_tickets_sold
+                raise serializers.ValidationError(
+                    {
+                        "ticket_type": f"Event capacity reached. Only {max(0, available)} total tickets remaining for this event."
+                    }
                 )
 
         # Coupon Validation

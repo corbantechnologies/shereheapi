@@ -29,9 +29,38 @@ class TicketType(UniversalIdModel, TimeStampedModel, ReferenceModel):
         default=False,
         help_text="Indicates if ticket type is limited; if True and quantity_available is None, uses event capacity",
     )
+    sales_start = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When ticket sales begin. Leave blank to start immediately.",
+    )
+    sales_end = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When ticket sales end. Leave blank to sell until event ends.",
+    )
     ticket_type_code = models.CharField(
         max_length=255, unique=True, default=generate_ticket_type_code, editable=False
     )
+
+    @property
+    def tickets_sold(self):
+        # We consider both CONFIRMED and PENDING bookings to ensure capacity isn't oversold while people checkout
+        return sum(
+            booking.quantity
+            for booking in self.bookings.filter(status__in=["CONFIRMED", "PENDING"])
+        )
+
+    @property
+    def is_currently_on_sale(self):
+        from django.utils import timezone
+
+        now = timezone.now()
+        if self.sales_start and now < self.sales_start:
+            return False
+        if self.sales_end and now > self.sales_end:
+            return False
+        return True
 
     class Meta:
         verbose_name = "Ticket Type"
