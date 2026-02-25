@@ -8,6 +8,7 @@ from company.models import Company
 from tickettypes.models import TicketType
 from tickettypes.serializers import TicketTypeSerializer
 from django.db import transaction
+from coupons.serializers import CouponSerializer
 
 User = get_user_model()
 
@@ -23,6 +24,9 @@ class EventSerializer(serializers.ModelSerializer):
     start_time = serializers.TimeField(required=False, allow_null=True)
     end_time = serializers.TimeField(required=False, allow_null=True)
     ticket_types = TicketTypeSerializer(
+        many=True, required=False, allow_null=True
+    )
+    coupons = CouponSerializer(
         many=True, required=False, allow_null=True
     )
 
@@ -50,6 +54,7 @@ class EventSerializer(serializers.ModelSerializer):
             "updated_at",
             "reference",
             "ticket_types",
+            "coupons",
         ]
 
     def validate(self, attrs):
