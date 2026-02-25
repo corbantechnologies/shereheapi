@@ -63,6 +63,6 @@ class Ticket(UniversalIdModel, TimeStampedModel, ReferenceModel):
                 resource_type="image",
                 format="png",
             )
-            self.qr_code = upload_result["url"]
+            self.qr_code = upload_result["secure_url"]
 
         super().save(*args, **kwargs)
