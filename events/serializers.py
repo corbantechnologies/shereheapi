@@ -26,6 +26,7 @@ class EventSerializer(serializers.ModelSerializer):
     ticket_types = TicketTypeSerializer(many=True, required=False, allow_null=True)
     coupons = CouponSerializer(many=True, required=False, allow_null=True)
     tickets_sold = serializers.SerializerMethodField()
+    tickets = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -53,6 +54,7 @@ class EventSerializer(serializers.ModelSerializer):
             "ticket_types",
             "coupons",
             "tickets_sold",
+            "tickets",
         ]
 
     def validate(self, attrs):
@@ -95,7 +97,19 @@ class EventSerializer(serializers.ModelSerializer):
         return attrs
 
     def get_tickets_sold(self, obj):
-        return sum(ticket_type.tickets_sold for ticket_type in obj.ticket_types.all())
+        from tickets.models import Ticket
+
+        # Count actual generated tickets to avoid discrepancy with pending bookings
+        return Ticket.objects.filter(ticket_type__event=obj).count()
+
+    def get_tickets(self, obj):
+        from tickets.models import Ticket
+        from tickets.serializers import TicketSerializer
+
+        tickets = Ticket.objects.filter(ticket_type__event=obj).select_related(
+            "booking", "ticket_type"
+        )
+        return TicketSerializer(tickets, many=True).data
 
     def create(self, validated_data):
         ticket_types_data = validated_data.pop("ticket_types", None)
