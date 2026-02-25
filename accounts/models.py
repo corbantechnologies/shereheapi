@@ -75,7 +75,9 @@ class User(
     is_superuser = models.BooleanField(default=False)
 
     # Business
-    is_premium = models.BooleanField(default=False, help_text="Is the user a premium user?")
+    is_premium = models.BooleanField(
+        default=False, help_text="Is the user a premium user?"
+    )
 
     objects = UserManager()
 
@@ -95,6 +97,3 @@ class User(
 
     def get_short_name(self):
         return self.first_name
-
-    def get_username(self):
-        return self.username
