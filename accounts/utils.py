@@ -40,7 +40,7 @@ def send_event_manager_account_created_email(user):
             },
         )
         params = {
-            "from": "Sherehe <noreply@sherehe.co.ke>",
+            "from": "Sherehe Tickets Kenya <noreply@sherehe.co.ke>",
             "to": [user.email],
             "subject": "Your Sherehe Account Has Been Created",
             "html": email_body,
@@ -71,7 +71,7 @@ def send_password_reset_email(user, code):
             },
         )
         params = {
-            "from": "Sherehe <noreply@sherehe.co.ke>",
+            "from": "Sherehe Tickets Kenya <noreply@sherehe.co.ke>",
             "to": [user.email],
             "subject": "Password Reset",
             "html": email_body,
