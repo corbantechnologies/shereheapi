@@ -83,28 +83,21 @@ class TicketTypeSerializer(serializers.ModelSerializer):
         # Validate against Event dates if event is resolved
         if event:
             import datetime
-            from django.utils import timezone
 
-            # Helper to convert a Date into a DateTime (midnight) for comparison
-            def to_datetime(d):
-                return timezone.make_aware(
-                    datetime.datetime.combine(d, datetime.time.min)
-                )
-
-            # If event has an end_date, sales cannot be after it. If no end_date, sales cannot be after start_date.
             event_cutoff_date = event.end_date if event.end_date else event.start_date
 
             if event_cutoff_date:
-                event_cutoff_datetime = to_datetime(event_cutoff_date)
-                # To be lenient, we'll allow selling *on* the end date, so we add 1 day to the cutoff for strictly < comparisons
-                cutoff_plus_one = event_cutoff_datetime + datetime.timedelta(days=1)
+                # To be lenient, we'll allow selling *on* the end date, so we check if start > cutoff
+                # or end > cutoff directly with dates.
 
-                if sales_start and sales_start >= cutoff_plus_one:
+                if sales_start and sales_start > event_cutoff_date:
                     raise serializers.ValidationError(
-                        {"sales_start": "Sales must start before the event concludes."}
+                        {
+                            "sales_start": "Sales must start before or on the day the event concludes."
+                        }
                     )
 
-                if sales_end and sales_end > cutoff_plus_one:
+                if sales_end and sales_end > event_cutoff_date:
                     raise serializers.ValidationError(
                         {
                             "sales_end": "Sales must end before or on the day the event concludes."
