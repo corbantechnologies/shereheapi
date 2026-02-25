@@ -32,6 +32,9 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
     image = CloudinaryField(
         "event_image", help_text="Image of the event", blank=True, null=True
     )
+    is_published = models.BooleanField(
+        default=False, help_text="Is the event published?"
+    )
     is_closed = models.BooleanField(default=False, help_text="Is the event closed?")
     cancellation_policy = models.TextField(
         blank=True, null=True, help_text="Cancellation policy for the event"
