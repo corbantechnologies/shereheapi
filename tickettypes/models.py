@@ -29,12 +29,12 @@ class TicketType(UniversalIdModel, TimeStampedModel, ReferenceModel):
         default=False,
         help_text="Indicates if ticket type is limited; if True and quantity_available is None, uses event capacity",
     )
-    sales_start = models.DateTimeField(
+    sales_start = models.DateField(
         null=True,
         blank=True,
         help_text="When ticket sales begin. Leave blank to start immediately.",
     )
-    sales_end = models.DateTimeField(
+    sales_end = models.DateField(
         null=True,
         blank=True,
         help_text="When ticket sales end. Leave blank to sell until event ends.",
@@ -62,10 +62,10 @@ class TicketType(UniversalIdModel, TimeStampedModel, ReferenceModel):
         if not self.is_active:
             return False
 
-        now = timezone.now()
-        if self.sales_start and now < self.sales_start:
+        now_date = timezone.now().date()
+        if self.sales_start and now_date < self.sales_start:
             return False
-        if self.sales_end and now > self.sales_end:
+        if self.sales_end and now_date > self.sales_end:
             return False
         return True
 
@@ -80,12 +80,12 @@ class TicketType(UniversalIdModel, TimeStampedModel, ReferenceModel):
 
         from django.utils import timezone
 
-        now = timezone.now()
+        now_date = timezone.now().date()
 
-        if self.sales_start and now < self.sales_start:
+        if self.sales_start and now_date < self.sales_start:
             return "UPCOMING"
 
-        if self.sales_end and now > self.sales_end:
+        if self.sales_end and now_date > self.sales_end:
             return "ENDED"
 
         return "ON_SALE"

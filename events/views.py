@@ -33,7 +33,9 @@ class EventRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        if self.request.user.is_event_manager:
+        if self.request.user.is_authenticated and getattr(
+            self.request.user, "is_event_manager", False
+        ):
             queryset = queryset.filter(manager=self.request.user)
         else:
             queryset = queryset.filter(is_published=True)
