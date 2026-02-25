@@ -62,6 +62,55 @@ class TicketTypeSerializer(serializers.ModelSerializer):
                     f"Total ticket quantities ({total_tickets}) exceed event capacity ({event.capacity})."
                 )
 
+        # Timeframes Validation
+        sales_start = attrs.get("sales_start")
+        sales_end = attrs.get("sales_end")
+
+        # In case of partial update, fallback to existing instance values
+        if self.instance:
+            sales_start = (
+                sales_start if "sales_start" in attrs else self.instance.sales_start
+            )
+            sales_end = sales_end if "sales_end" in attrs else self.instance.sales_end
+            event = event if "event" in attrs else self.instance.event
+
+        if sales_start and sales_end:
+            if sales_start >= sales_end:
+                raise serializers.ValidationError(
+                    {"sales_end": "Sales end date must be after sales start date."}
+                )
+
+        # Validate against Event dates if event is resolved
+        if event:
+            import datetime
+            from django.utils import timezone
+
+            # Helper to convert a Date into a DateTime (midnight) for comparison
+            def to_datetime(d):
+                return timezone.make_aware(
+                    datetime.datetime.combine(d, datetime.time.min)
+                )
+
+            # If event has an end_date, sales cannot be after it. If no end_date, sales cannot be after start_date.
+            event_cutoff_date = event.end_date if event.end_date else event.start_date
+
+            if event_cutoff_date:
+                event_cutoff_datetime = to_datetime(event_cutoff_date)
+                # To be lenient, we'll allow selling *on* the end date, so we add 1 day to the cutoff for strictly < comparisons
+                cutoff_plus_one = event_cutoff_datetime + datetime.timedelta(days=1)
+
+                if sales_start and sales_start >= cutoff_plus_one:
+                    raise serializers.ValidationError(
+                        {"sales_start": "Sales must start before the event concludes."}
+                    )
+
+                if sales_end and sales_end > cutoff_plus_one:
+                    raise serializers.ValidationError(
+                        {
+                            "sales_end": "Sales must end before or on the day the event concludes."
+                        }
+                    )
+
         return attrs
 
 
