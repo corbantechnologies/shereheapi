@@ -23,12 +23,9 @@ class EventSerializer(serializers.ModelSerializer):
     end_date = serializers.DateField(required=False, allow_null=True)
     start_time = serializers.TimeField(required=False, allow_null=True)
     end_time = serializers.TimeField(required=False, allow_null=True)
-    ticket_types = TicketTypeSerializer(
-        many=True, required=False, allow_null=True
-    )
-    coupons = CouponSerializer(
-        many=True, required=False, allow_null=True
-    )
+    ticket_types = TicketTypeSerializer(many=True, required=False, allow_null=True)
+    coupons = CouponSerializer(many=True, required=False, allow_null=True)
+    tickets_sold = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -55,6 +52,7 @@ class EventSerializer(serializers.ModelSerializer):
             "reference",
             "ticket_types",
             "coupons",
+            "tickets_sold",
         ]
 
     def validate(self, attrs):
@@ -95,6 +93,9 @@ class EventSerializer(serializers.ModelSerializer):
                     )
 
         return attrs
+
+    def get_tickets_sold(self, obj):
+        return sum(ticket_type.tickets_sold for ticket_type in obj.ticket_types.all())
 
     def create(self, validated_data):
         ticket_types_data = validated_data.pop("ticket_types", None)
