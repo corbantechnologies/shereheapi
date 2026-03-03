@@ -36,6 +36,7 @@ class EventSerializer(serializers.ModelSerializer):
             "company",
             "name",
             "description",
+            "content",
             "start_date",
             "end_date",
             "start_time",
