@@ -41,6 +41,7 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
     event_code = models.CharField(
         max_length=2000, unique=True, default=generate_event_code, editable=False
     )
+    refund_policy = models.JSONField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Event"

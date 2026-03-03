@@ -46,6 +46,7 @@ class EventSerializer(serializers.ModelSerializer):
             "image",
             "is_published",
             "is_closed",
+            "refund_policy",
             "identity",
             "event_code",
             "created_at",
