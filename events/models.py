@@ -17,7 +17,8 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
         Company, on_delete=models.CASCADE, related_name="company_events"
     )
     name = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
+    content = models.JSONField(blank=True, null=True)
     start_date = models.DateField()
     start_time = models.TimeField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
@@ -36,9 +37,7 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
         default=False, help_text="Is the event published?"
     )
     is_closed = models.BooleanField(default=False, help_text="Is the event closed?")
-    cancellation_policy = models.TextField(
-        blank=True, null=True, help_text="Cancellation policy for the event"
-    )
+    cancellation_policy = models.JSONField(blank=True, null=True)
     identity = models.CharField(max_length=2000, unique=True, blank=True)
     event_code = models.CharField(
         max_length=2000, unique=True, default=generate_event_code, editable=False
