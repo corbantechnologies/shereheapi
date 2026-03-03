@@ -7,7 +7,13 @@ import json
 def convert_cancellation_policy_to_json(apps, schema_editor):
     Event = apps.get_model("events", "Event")
     for event in Event.objects.all():
-        if event.cancellation_policy:
+        if (
+            event.cancellation_policy is None
+            or str(event.cancellation_policy).strip() == ""
+        ):
+            event.cancellation_policy = None
+            event.save(update_fields=["cancellation_policy"])
+        else:
             try:
                 # Check if it's already valid JSON
                 json.loads(event.cancellation_policy)
