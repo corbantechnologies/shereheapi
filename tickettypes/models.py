@@ -49,10 +49,9 @@ class TicketType(UniversalIdModel, TimeStampedModel, ReferenceModel):
 
     @property
     def tickets_sold(self):
-        # We consider both CONFIRMED and PENDING bookings to ensure capacity isn't oversold while people checkout
         return sum(
             booking.quantity
-            for booking in self.bookings.filter(status__in=["CONFIRMED", "PENDING"])
+            for booking in self.bookings.filter(payment_status__in=["COMPLETED"])
         )
 
     @property
