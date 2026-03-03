@@ -10,6 +10,7 @@ class TicketTypeSerializer(serializers.ModelSerializer):
         slug_field="event_code", queryset=Event.objects.all()
     )
     bookings = BookingSerializer(many=True, read_only=True)
+    tickets_sold = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = TicketType
@@ -28,6 +29,7 @@ class TicketTypeSerializer(serializers.ModelSerializer):
             "updated_at",
             "reference",
             "bookings",
+            "tickets_sold",
         ]
 
     def validate(self, attrs):
