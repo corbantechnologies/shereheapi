@@ -37,7 +37,6 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
         default=False, help_text="Is the event published?"
     )
     is_closed = models.BooleanField(default=False, help_text="Is the event closed?")
-    cancellation_policy = models.JSONField(blank=True, null=True)
     identity = models.CharField(max_length=2000, unique=True, blank=True)
     event_code = models.CharField(
         max_length=2000, unique=True, default=generate_event_code, editable=False
