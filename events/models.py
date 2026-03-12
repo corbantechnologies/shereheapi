@@ -17,8 +17,12 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
         Company, on_delete=models.CASCADE, related_name="company_events"
     )
     name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
-    content = models.JSONField(blank=True, null=True)
+    description = models.TextField(
+        blank=True, null=True, help_text="Short description of the event"
+    )
+    content = models.JSONField(
+        blank=True, null=True, help_text="Long description of the event"
+    )
     start_date = models.DateField()
     start_time = models.TimeField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
@@ -41,7 +45,9 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
     event_code = models.CharField(
         max_length=2000, unique=True, default=generate_event_code, editable=False
     )
-    refund_policy = models.JSONField(blank=True, null=True)
+    refund_policy = models.JSONField(
+        blank=True, null=True, help_text="Refund policy of the event"
+    )
 
     class Meta:
         verbose_name = "Event"

@@ -288,6 +288,14 @@ class MpesaCallbackView(APIView):
                     f"Reduced availability for {ticket_type.name}: {ticket_type.quantity_available} left"
                 )
 
+            # Track affiliate / coupon ticket sales
+            if booking.coupon:
+                booking.coupon.tickets_sold += booking.quantity
+                booking.coupon.save()
+                logger.info(
+                    f"Coupon {booking.coupon.code} tickets_sold updated to {booking.coupon.tickets_sold}"
+                )
+
         frontend_url = f"{settings.SITE_URL}/payment/{booking.reference}/success"
         booking.redirect_url = frontend_url
         booking.save()

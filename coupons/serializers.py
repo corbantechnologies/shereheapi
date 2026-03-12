@@ -88,6 +88,7 @@ class CouponSerializer(serializers.ModelSerializer):
             "valid_to",
             "usage_limit",
             "usage_count",
+            "tickets_sold",
             "is_active",
             "created_at",
             "updated_at",
