@@ -43,6 +43,10 @@ class Coupon(TimeStampedModel, ReferenceModel, UniversalIdModel):
     valid_to = models.DateTimeField()
     usage_limit = models.PositiveIntegerField(default=0, help_text="0 means unlimited")
     usage_count = models.PositiveIntegerField(default=0)
+    tickets_sold = models.PositiveIntegerField(
+        default=0,
+        help_text="Total number of tickets successfully purchased using this coupon",
+    )
     is_active = models.BooleanField(default=True)
     # Adding Email incase we are emailing it to someone specific
     email = models.EmailField(blank=True, null=True)
