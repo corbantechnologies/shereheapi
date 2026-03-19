@@ -31,7 +31,7 @@ class Coupon(TimeStampedModel, ReferenceModel, UniversalIdModel):
         max_length=2550, blank=True, null=True, help_text="Optional"
     )
     code = models.CharField(
-        max_length=10, unique=True, default=generate_code, editable=False
+        max_length=60, unique=True, default=generate_code
     )
     discount_type = models.CharField(
         max_length=20, choices=DISCOUNT_TYPE_CHOICES, default="PERCENTAGE"
