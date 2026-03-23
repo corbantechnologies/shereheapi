@@ -1,5 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
+from django.utils import timezone
+from datetime import timedelta
 
 from bookings.serializers import BookingSerializer
 from bookings.models import Booking
@@ -22,9 +24,16 @@ class BookingListView(generics.ListAPIView):
     ]
 
     def get_queryset(self):
-        return Booking.objects.filter(
+        # Base queryset for organizer's bookings
+        queryset = Booking.objects.filter(
             ticket_type__event__company__manager=self.request.user
         )
+
+        # Defualt expiration threshold (30 minutes)
+        threshold_time = timezone.now() - timedelta(minutes=30)
+
+        # Exclude bookings that are PENDING and older than the threshold
+        return queryset.exclude(status="PENDING", created_at__lt=threshold_time)
 
 
 class BookingDetailView(generics.RetrieveAPIView):

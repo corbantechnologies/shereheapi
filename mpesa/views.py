@@ -288,12 +288,22 @@ class MpesaCallbackView(APIView):
                     f"Reduced availability for {ticket_type.name}: {ticket_type.quantity_available} left"
                 )
 
-            # Track affiliate / coupon ticket sales
+            # Track affiliate / coupon ticket sales and usage
             if booking.coupon:
                 booking.coupon.tickets_sold += booking.quantity
+                booking.coupon.usage_count += 1
                 booking.coupon.save()
+
+                # check if usage limit reached
+                if (
+                    booking.coupon.usage_limit > 0
+                    and booking.coupon.usage_count >= booking.coupon.usage_limit
+                ):
+                    booking.coupon.is_active = False
+                    booking.coupon.save()
+
                 logger.info(
-                    f"Coupon {booking.coupon.code} tickets_sold updated to {booking.coupon.tickets_sold}"
+                    f"Coupon {booking.coupon.code} updated: usage_count={booking.coupon.usage_count}, tickets_sold={booking.coupon.tickets_sold}"
                 )
 
         frontend_url = f"{settings.SITE_URL}/payment/{booking.reference}/success"
