@@ -63,13 +63,13 @@ class CouponValidateView(APIView):
                 {"error": "Coupon is inactive"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        if coupon.valid_from > timezone.now():
+        if coupon.valid_from > timezone.now().date():
             return Response(
                 {"error": "Coupon is not yet active"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if coupon.valid_to < timezone.now():
+        if coupon.valid_to < timezone.now().date():
             return Response(
                 {"error": "Coupon has expired"}, status=status.HTTP_400_BAD_REQUEST
             )
