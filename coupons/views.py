@@ -105,17 +105,41 @@ class CouponValidateView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            discount_value = coupon.apply_discount(ticket_type)
-            discount_amount = ticket_type.price - discount_value
-        else:
-            discount_amount = 0
 
-        return Response(
-            {
-                "message": "Coupon applied successfully",
-                "discount_amount": discount_amount,
-                "discount_value": coupon.discount_value,
-                "discount_type": coupon.discount_type,
-            },
-            status=status.HTTP_200_OK,
-        )
+        response_data = {
+            "message": "Coupon applied successfully",
+            "discount_value": coupon.discount_value,
+            "discount_type": coupon.discount_type,
+            "applies_to_all": not coupon.ticket_type.exists(),
+        }
+
+        if ticket_type_code:
+            discount_value = coupon.apply_discount(ticket_type)
+            response_data["discount_amount"] = float(ticket_type.price - discount_value)
+            response_data["final_price"] = float(discount_value)
+            response_data["valid_tickets"] = [
+                {
+                    "ticket_type_code": ticket_type.ticket_type_code,
+                    "name": ticket_type.name,
+                    "original_price": float(ticket_type.price),
+                    "discounted_price": float(discount_value),
+                }
+            ]
+        else:
+            response_data["discount_amount"] = 0
+            if coupon.ticket_type.exists():
+                applicable_tickets = coupon.ticket_type.all()
+            else:
+                applicable_tickets = coupon.event.ticket_types.all()
+
+            response_data["valid_tickets"] = [
+                {
+                    "ticket_type_code": tt.ticket_type_code,
+                    "name": tt.name,
+                    "original_price": float(tt.price),
+                    "discounted_price": float(coupon.apply_discount(tt)),
+                }
+                for tt in applicable_tickets
+            ]
+
+        return Response(response_data, status=status.HTTP_200_OK)
