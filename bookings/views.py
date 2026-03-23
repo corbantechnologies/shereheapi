@@ -30,7 +30,7 @@ class BookingListView(generics.ListAPIView):
         )
 
         # Defualt expiration threshold (30 minutes)
-        threshold_time = timezone.now() - timedelta(minutes=30)
+        threshold_time = timezone.now() - timedelta(minutes=15)
 
         # Exclude bookings that are PENDING and older than the threshold
         return queryset.exclude(status="PENDING", created_at__lt=threshold_time)
