@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from coupons.models import Coupon
 from events.models import Event
@@ -22,6 +23,14 @@ class CouponSerializer(serializers.ModelSerializer):
         many=True,
         required=False,
     )
+    code = serializers.CharField(
+        required=False,
+        validators=[
+            UniqueValidator(
+                queryset=Coupon.objects.all(), message="Coupon code already exists."
+            )
+        ],
+    )
     event_details = serializers.SerializerMethodField()
     ticket_type_details = TicketTypeSimpleSerializer(
         source="ticket_type", many=True, read_only=True
@@ -38,11 +47,17 @@ class CouponSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         event = attrs.get("event")
-        # If event is not provided in the update, get it from the instance
-        if not event and self.instance:
-            event = self.instance.event
+        ticket_types = attrs.get("ticket_type")
+        valid_from = attrs.get("valid_from")
+        valid_to = attrs.get("valid_to")
 
-        ticket_types = attrs.get("ticket_type", [])
+        # For updates, if fields are missing from the request, use the existing instance values
+        if self.instance:
+            if event is None:
+                event = self.instance.event
+            if ticket_types is None:
+                # If ticket_type is not in the request, we should check against current ticket types
+                ticket_types = self.instance.ticket_type.all()
 
         if ticket_types and event:
             for ticket_type in ticket_types:
@@ -50,6 +65,23 @@ class CouponSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         f"Ticket type {ticket_type.name} does not belong to event {event.name}"
                     )
+
+        # Default logic for dates during creation
+        if not self.instance:
+            if not valid_from:
+                from django.utils import timezone
+
+                attrs["valid_from"] = timezone.now().date()
+
+            if not valid_to:
+                if ticket_types:
+                    # Match user's logic: use sales_end of a ticket type or event start_date
+                    # Using first().sales_end from model logic
+                    first_tt = ticket_types[0]
+                    attrs["valid_to"] = getattr(first_tt, "sales_end", None) or event.start_date
+                elif event:
+                    attrs["valid_to"] = event.start_date
+
         return attrs
 
 
@@ -97,3 +129,11 @@ class CouponSerializer(serializers.ModelSerializer):
             "event_details",
             "ticket_type_details",
         )
+        extra_kwargs = {
+            "code": {"required": False},
+            "valid_from": {"required": False},
+            "valid_to": {"required": False},
+            "usage_count": {"read_only": True},
+            "tickets_sold": {"read_only": True},
+            "reference": {"read_only": True},
+        }

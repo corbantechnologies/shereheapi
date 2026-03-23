@@ -39,8 +39,8 @@ class Coupon(TimeStampedModel, ReferenceModel, UniversalIdModel):
     discount_value = models.DecimalField(
         max_digits=10, decimal_places=2, help_text="Cannot be negative, Cannot be blank"
     )
-    valid_from = models.DateTimeField()
-    valid_to = models.DateTimeField()
+    valid_from = models.DateField()
+    valid_to = models.DateField(blank=True, null=True)
     usage_limit = models.PositiveIntegerField(default=0, help_text="0 means unlimited")
     usage_count = models.PositiveIntegerField(default=0)
     tickets_sold = models.PositiveIntegerField(
@@ -55,6 +55,20 @@ class Coupon(TimeStampedModel, ReferenceModel, UniversalIdModel):
         verbose_name = "Coupon"
         verbose_name_plural = "Coupons"
         ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = generate_code()
+
+        if not self.valid_to:
+            # if ticket type has been given then it becomes the sales end for that ticket type
+            # else it becomes the sales end for the event
+            if self.ticket_type.exists():
+                self.valid_to = self.ticket_type.first().sales_end
+            else:
+                self.valid_to = self.event.start_date
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.code} - {self.discount_type} {self.discount_value} {self.event.name}"
