@@ -110,12 +110,12 @@ class BookingSerializer(serializers.ModelSerializer):
             if not coupon.is_active:
                 raise serializers.ValidationError({"coupon": "Coupon is inactive"})
 
-            if coupon.valid_from > timezone.now():
+            if coupon.valid_from > timezone.now().date():
                 raise serializers.ValidationError(
                     {"coupon": "Coupon is not yet active"}
                 )
 
-            if coupon.valid_to < timezone.now():
+            if coupon.valid_to < timezone.now().date():
                 raise serializers.ValidationError({"coupon": "Coupon has expired"})
 
             if coupon.usage_limit > 0 and coupon.usage_count >= coupon.usage_limit:
