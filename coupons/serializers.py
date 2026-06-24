@@ -137,3 +137,23 @@ class CouponSerializer(serializers.ModelSerializer):
             "tickets_sold": {"read_only": True},
             "reference": {"read_only": True},
         }
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get("request")
+
+        is_manager = False
+        if request and request.user and request.user.is_authenticated:
+            if request.user.is_superuser or (
+                hasattr(request.user, "is_event_manager")
+                and request.user.is_event_manager
+                and instance.event.manager == request.user
+            ):
+                is_manager = True
+
+        if not is_manager:
+            representation.pop("usage_count", None)
+            representation.pop("tickets_sold", None)
+            representation.pop("email", None)
+
+        return representation
