@@ -21,7 +21,7 @@ class TicketSerializer(serializers.ModelSerializer):
         ]
 
     def get_booking_info(self, obj):
-        return {
+        info = {
             "name": obj.booking.name,
             "email": obj.booking.email,
             "phone": obj.booking.phone,
@@ -41,3 +41,27 @@ class TicketSerializer(serializers.ModelSerializer):
             "mpesa_phone_number": obj.booking.mpesa_phone_number,
             "reference": obj.booking.reference,
         }
+
+        request = self.context.get("request")
+        is_manager = False
+        if request and request.user and request.user.is_authenticated:
+            if request.user.is_superuser or (
+                hasattr(request.user, "is_event_manager")
+                and request.user.is_event_manager
+                and obj.ticket_type.event.manager == request.user
+            ):
+                is_manager = True
+
+        if not is_manager:
+            sensitive_fields = [
+                "payment_account",
+                "mpesa_receipt_number",
+                "mpesa_phone_number",
+                "payment_method",
+                "payment_date",
+                "payment_status_description",
+            ]
+            for field in sensitive_fields:
+                info.pop(field, None)
+
+        return info

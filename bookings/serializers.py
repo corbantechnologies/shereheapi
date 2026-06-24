@@ -49,6 +49,33 @@ class BookingSerializer(serializers.ModelSerializer):
             "coupon",
         ]
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get("request")
+
+        is_manager = False
+        if request and request.user and request.user.is_authenticated:
+            if request.user.is_superuser or (
+                hasattr(request.user, "is_event_manager")
+                and request.user.is_event_manager
+                and instance.ticket_type.event.manager == request.user
+            ):
+                is_manager = True
+
+        if not is_manager:
+            sensitive_fields = [
+                "payment_account",
+                "mpesa_receipt_number",
+                "mpesa_phone_number",
+                "payment_method",
+                "payment_date",
+                "payment_status_description",
+            ]
+            for field in sensitive_fields:
+                representation.pop(field, None)
+
+        return representation
+
     def get_ticket_type_info(self, obj):
         return {
             "ticket_type_code": obj.ticket_type.ticket_type_code,
