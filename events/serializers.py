@@ -58,6 +58,25 @@ class EventSerializer(serializers.ModelSerializer):
             "tickets",
         ]
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get("request")
+
+        is_manager = False
+        if request and request.user and request.user.is_authenticated:
+            if request.user.is_superuser or (
+                hasattr(request.user, "is_event_manager")
+                and request.user.is_event_manager
+                and instance.manager == request.user
+            ):
+                is_manager = True
+
+        if not is_manager:
+            representation.pop("tickets", None)
+            representation.pop("tickets_sold", None)
+
+        return representation
+
     def validate(self, attrs):
         # Validate start date
         if attrs.get("start_date"):
