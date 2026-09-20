@@ -14,12 +14,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = config("SECRET_KEY", default="django-insecure-sherehe-secret-key-prod-dev-992")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(",")
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*").split(",")
+
 
 
 # Application definition
@@ -60,10 +61,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ORIGIN_WHITELIST = config("CORS_ORIGIN_WHITELIST").split(",")
+CORS_ORIGIN_WHITELIST = config("CORS_ORIGIN_WHITELIST", default="http://localhost:3000,http://127.0.0.1:3000").split(",")
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_PRIVATE_NETWORK = True
-CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS").split(",")
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="http://localhost:3000,http://127.0.0.1:3000").split(",")
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_HEADERS = default_headers + (
     "Access-Control-Allow-Origin",
@@ -77,7 +78,7 @@ CORS_ALLOW_HEADERS = default_headers + (
     "x-requested-with",
 )
 
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS").split(",")
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="http://localhost:3000,http://127.0.0.1:3000").split(",")
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -104,7 +105,7 @@ WSGI_APPLICATION = "shereheapi.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-db_config = dj_database_url.config(default=config("DATABASE_URL"))
+db_config = dj_database_url.config(default=config("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"))
 DATABASES = {"default": db_config}
 
 
@@ -171,27 +172,31 @@ REST_FRAMEWORK = {
 
 # cloudinary settings
 cloudinary.config(
-    cloud_name=config("CLOUDINARY_NAME"),
-    api_key=config("CLOUDINARY_API_KEY"),
-    api_secret=config("CLOUDINARY_API_SECRET"),
+    cloud_name=config("CLOUDINARY_NAME", default="dnbvhyj3x"),
+    api_key=config("CLOUDINARY_API_KEY", default="1234567890"),
+    api_secret=config("CLOUDINARY_API_SECRET", default="abcdefghijklmnopqrstuvwxyz"),
 )
 
 # Safaricom Mpesa Daraja API
-MPESA_CONSUMER_KEY = config("MPESA_CONSUMER_KEY")
-MPESA_CONSUMER_SECRET = config("MPESA_CONSUMER_SECRET")
-MPESA_SHORTCODE = config("MPESA_SHORTCODE")
-MPESA_PASSKEY = config("MPESA_PASSKEY")
-MPESA_CALLBACK_URL = config("MPESA_CALLBACK_URL")
-MPESA_API_URL = config("MPESA_API_URL")
+MPESA_CONSUMER_KEY = config("MPESA_CONSUMER_KEY", default="")
+MPESA_CONSUMER_SECRET = config("MPESA_CONSUMER_SECRET", default="")
+MPESA_SHORTCODE = config("MPESA_SHORTCODE", default="")
+MPESA_PASSKEY = config("MPESA_PASSKEY", default="")
+MPESA_CALLBACK_URL = config("MPESA_CALLBACK_URL", default="https://api.sherehe.co.ke/api/mpesa/callback/")
+MPESA_API_URL = config("MPESA_API_URL", default="https://sandbox.safaricom.co.ke")
 
 # Resend
-RESEND_API_KEY = config("RESEND_API_KEY")
+RESEND_API_KEY = config("RESEND_API_KEY", default="")
 
 # Bookings
-PAYMENT_TIMEOUT_MINUTES = config("PAYMENT_TIMEOUT_MINUTES")
+PAYMENT_TIMEOUT_MINUTES = config("PAYMENT_TIMEOUT_MINUTES", default="15")
 
 # Basic Settings
-BASE_URL = config("BASE_URL")
-SITE_URL = config("SITE_URL")
-SUPPORT_EMAIL = config("SUPPORT_EMAIL")
-SUPPORT_PHONE = config("SUPPORT_PHONE")
+BASE_URL = config("BASE_URL", default="http://localhost:8000")
+SITE_URL = config("SITE_URL", default="http://localhost:3000")
+SUPPORT_EMAIL = config("SUPPORT_EMAIL", default="support@sherehe.co.ke")
+SUPPORT_PHONE = config("SUPPORT_PHONE", default="+254700000000")
+
+# LJK Marketing Agency Gateway Integration
+MARKETING_AGENCY_API_URL = config("MARKETING_AGENCY_API_URL", default="http://localhost:8001")
+MARKETING_AGENCY_API_KEY = config("MARKETING_AGENCY_API_KEY", default="")

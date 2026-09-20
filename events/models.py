@@ -48,6 +48,24 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
     refund_policy = models.JSONField(
         blank=True, null=True, help_text="Refund policy of the event"
     )
+    category = models.CharField(
+        max_length=100,
+        default="Music & Concerts",
+        blank=True,
+        help_text="Event Category (e.g. Music & Concerts, Festivals, Tech & Business)",
+    )
+    gate_passcode = models.CharField(
+        max_length=12,
+        blank=True,
+        null=True,
+        help_text="PIN for gate staff to scan tickets without login",
+    )
+    platform_fee_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=3.50,
+        help_text="Platform commission fee percentage (default 3.5%)",
+    )
 
     class Meta:
         verbose_name = "Event"
@@ -58,6 +76,7 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
         return self.name
 
     def save(self, *args, **kwargs):
+        import secrets
         if not self.identity:
             base_identity = slugify(self.name)
             identity = base_identity
@@ -66,4 +85,44 @@ class Event(UniversalIdModel, TimeStampedModel, ReferenceModel):
                 identity = f"{base_identity}-{counter}"
                 counter += 1
             self.identity = identity
+
+        if not self.gate_passcode:
+            self.gate_passcode = f"SH-{secrets.randbelow(90000) + 10000}"
+
         super().save(*args, **kwargs)
+
+
+class PayoutRequest(UniversalIdModel, TimeStampedModel, ReferenceModel):
+    STATUS_CHOICES = (
+        ("PENDING", "Pending"),
+        ("APPROVED", "Approved"),
+        ("DISBURSED", "Disbursed"),
+        ("REJECTED", "Rejected"),
+    )
+
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name="payout_requests"
+    )
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name="payout_requests"
+    )
+    requested_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="requested_payouts"
+    )
+    amount_requested = models.DecimalField(max_digits=12, decimal_places=2)
+    platform_fee_deducted = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    net_payout_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    payout_phone = models.CharField(max_length=50)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
+    mpesa_transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+    disbursed_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Payout Request"
+        verbose_name_plural = "Payout Requests"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.event.name} - KES {self.net_payout_amount} ({self.status})"
+

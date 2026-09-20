@@ -18,6 +18,7 @@ def generate_booking_code():
 
 def send_booking_confirmation_email(email, booking):
     try:
+        resend.api_key = getattr(settings, "RESEND_API_KEY", "")
         email_body = render_to_string(
             "booking_confirmation.html",
             {

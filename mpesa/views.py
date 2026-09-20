@@ -16,6 +16,7 @@ from mpesa.serializers import MpesaBodySerializer
 from bookings.models import Booking
 from bookings.utils import send_booking_confirmation_email
 from tickets.models import Ticket
+from tickets.dispatch import dispatch_ticket_confirmation
 
 logger = logging.getLogger(__name__)
 
@@ -314,12 +315,11 @@ class MpesaCallbackView(APIView):
             f"Payment SUCCESSFUL for booking {booking.booking_code} | Receipt: {confirmation_code}"
         )
 
-        # Send confirmation email in background
-        if booking.email:
-            threading.Thread(
-                target=send_booking_confirmation_email,
-                args=(booking.email, booking),
-            ).start()
+        # Multi-channel delivery pipeline: WhatsApp -> Fallback SMS -> Fallback Resend Email
+        threading.Thread(
+            target=dispatch_ticket_confirmation,
+            args=(booking,),
+        ).start()
 
         return Response(
             {
