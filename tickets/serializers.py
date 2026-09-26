@@ -30,6 +30,8 @@ class TicketSerializer(serializers.ModelSerializer):
             "status": obj.booking.status,
             "booking_code": obj.booking.booking_code,
             "event": obj.booking.event,
+            "event_code": obj.ticket_type.event.event_code if obj.ticket_type and obj.ticket_type.event else None,
+            "ticket_type_name": obj.ticket_type.name if obj.ticket_type else "General Admission",
             "payment_status": obj.booking.payment_status,
             "payment_status_description": obj.booking.payment_status_description,
             "payment_method": obj.booking.payment_method,

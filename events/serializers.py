@@ -46,6 +46,9 @@ class EventSerializer(serializers.ModelSerializer):
             "image",
             "is_published",
             "is_closed",
+            "category",
+            "gate_passcode",
+            "platform_fee_percent",
             "refund_policy",
             "identity",
             "event_code",
@@ -74,8 +77,10 @@ class EventSerializer(serializers.ModelSerializer):
         if not is_manager:
             representation.pop("tickets", None)
             representation.pop("tickets_sold", None)
+            representation.pop("gate_passcode", None)
 
         return representation
+
 
     def validate(self, attrs):
         # Validate start date
