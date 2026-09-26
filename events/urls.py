@@ -11,6 +11,8 @@ from tickets.scan_views import (
 from events.settlement_views import (
     EventSettlementView,
     EventPayoutRequestView,
+    PlatformAdminStatsView,
+    AdminPayoutActionView,
 )
 
 app_name = "events"
@@ -51,6 +53,16 @@ urlpatterns = [
         "<str:event_code>/payout-request/",
         EventPayoutRequestView.as_view(),
         name="event-payout-request",
+    ),
+    path(
+        "platform-stats/",
+        PlatformAdminStatsView.as_view(),
+        name="platform-admin-stats",
+    ),
+    path(
+        "payouts/<str:reference>/",
+        AdminPayoutActionView.as_view(),
+        name="admin-payout-action",
     ),
 ]
 
